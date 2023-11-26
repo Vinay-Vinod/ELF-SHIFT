@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>ELF Shifting Software</title>
+      <style>
+         table {
+         width: 100%;
+         border-collapse: collapse;
+         }
+         table, th, td {
+         border: 1px solid black;
+         }
+         th, td {
+         padding: 8px;
+         text-align: left;
+         }
+         th {
+         background-color: #f2f2f2;
+         }
+      </style>
+   </head>
+   <body>
+      <h1>ELF Shifting Software</h1>
+      <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+         <label for="shifts_file">Shifts File:</label>
+         <input type="file" id="shifts_file" name="shifts_file"><br><br>
+         <label for="available_times_file">Available Times File:</label>
+         <input type="file" id="available_times_file" name="available_times_file"><br><br>
+         <label for="exclusion_file">Exclusion File:</label>
+         <input type="file" id="exclusion_file" name="exclusion_file"><br><br>
+         <input type="button" value="Upload" onclick="uploadFiles()">
+      </form>
+      <h2>Results</h2>
+      <div id="results"></div>
+      <script>
+         function uploadFiles() {
+             var form = document.getElementById('uploadForm');
+             var formData = new FormData(form);
+         
+             fetch('/upload', {
+                 method: 'POST',
+                 body: formData
+             }).then(response => response.json())
+               .then(data => {
+                   var results = document.getElementById('results');
+                   results.innerHTML = ""; // Clear previous results
+                   var table = document.createElement('table');
+                   var thead = document.createElement('thead');
+                   var tbody = document.createElement('tbody');
+                   var headRow = document.createElement('tr');
+         
+                   // Assuming the result is a list of dictionaries
+                   if (data.length > 0) {
+                       var headers = Object.keys(data[0]);
+                       headers.forEach(header => {
+                           var th = document.createElement('th');
+                           th.appendChild(document.createTextNode(header));
+                           headRow.appendChild(th);
+                       });
+                       thead.appendChild(headRow);
+                       table.appendChild(thead);
+         
+                       data.forEach(row => {
+                           var tr = document.createElement('tr');
+                           headers.forEach(header => {
+                               var td = document.createElement('td');
+                               td.appendChild(document.createTextNode(row[header]));
+                               tr.appendChild(td);
+                           });
+                           tbody.appendChild(tr);
+                       });
+                       table.appendChild(tbody);
+                       results.appendChild(table);
+                   } else {
+                       results.innerHTML = "No results to display.";
+                   }
+               }).catch(error => {
+                   console.error('Error:', error);
+               });
+         }
+      </script>
+   </body>
+</html>
